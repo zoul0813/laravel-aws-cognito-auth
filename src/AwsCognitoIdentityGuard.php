@@ -431,13 +431,13 @@ class AwsCognitoIdentityGuard implements StatefulGuard
     {
         $this->fireAttemptEvent($credentials, $remember);
 
-        $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
-
         $response = $this->attemptCognitoAuthentication($credentials);
 
         // If the authentication attempt was successful then log the user into the
         // application and return an appropriate response.
         if ($response->successful()) {
+            
+            $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
 
             $this->cognitoTokens = $this->addTokenExpiryTimes($response->getResponse()['AuthenticationResult']);
 
@@ -448,6 +448,8 @@ class AwsCognitoIdentityGuard implements StatefulGuard
             $handler = is_null($errorHandler) ? $this->errorHandler : $errorHandler;
             return $handler == AWS_COGNITO_AUTH_RETURN_ATTEMPT ? $response : true;
         }
+
+        $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
 
         // If the authentication attempt fails we will fire an event so that the user
         // may be notified of any suspicious attempts to access their account from
